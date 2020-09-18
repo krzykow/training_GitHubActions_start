@@ -4,12 +4,16 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+
+env:
+  TEST: test
+  TEST2: test2
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Use Node.js
+    - name: Use ${{ env.TEST }}
       uses: actions/setup-node@v1
     - run: |
         npm ci
