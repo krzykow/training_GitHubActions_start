@@ -13,17 +13,13 @@ jobs:
     env:
       TEST: test_in_job
 
-    strategy:
-      matrix:
-        node-version: [10.x, 12.x]
+
 
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Use Node.js
       uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
     - run: echo ${{ env.TEST }}
     - name: Set variable
       run: echo '::set-env name=TEST::in_step'
@@ -33,6 +29,16 @@ jobs:
         npm run build --if-present
     - run: npm test
       if: ${{ success() }}
+
+    - name: Login via Az module
+      uses: azure/login@v1.1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+    - name: 'Deploy Azure Web App'
+      uses: azure/webapps-deploy@v1
+      with: 
+        app-name: nodeapp-training
+        publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
 
 
 
