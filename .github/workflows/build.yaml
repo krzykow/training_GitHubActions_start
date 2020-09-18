@@ -1,44 +1,34 @@
 name: Node.js CI
 on: 
   push:
-    branches: [ master ]
+    # branches: [ master ]
   pull_request:
-    branches: [ master ]
+    # branches: [ master ]
 env:
   TEST: test
   TEST2: test2
-
+  USER: krzykow
+  REPO: training_githubactions_start
 jobs:
   build:
     env:
       TEST: test_in_job
-
-
-
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Use Node.js
+    - name: Setup Node 12.x
       uses: actions/setup-node@v1
-    - run: echo ${{ env.TEST }}
-    - name: Set variable
-      run: echo '::set-env name=TEST::in_step'
-    - run: echo ${{ env.TEST }}
-    - run: |
-        npm ci
-        npm run build --if-present
-    - run: npm test
-      if: ${{ success() }}
-
-    - name: Login via Az module
-      uses: azure/login@v1.1
       with:
-        creds: ${{secrets.AZURE_CREDENTIALS}}
-    - name: 'Deploy Azure Web App'
-      uses: azure/webapps-deploy@v1
-      with: 
-        app-name: nodeapp-training
-        publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+        node-version: 12.x
+    - name: package docker
+      run: |
+        VERSION=$(date +%s)
+        docker login docker.pkg.github.com --username ${{ env.USER }} --password ${{ secrets.GITHUB_TOKEN }}
+        docker build . --file Dockerfile --tag docker.pkg.github.com/${{ env.USER }}/${{ env.REPO }}/app:${VERSION}
+        docker push docker.pkg.github.com/${{ env.USER }}/${{ env.REPO }}/app:${VERSION}
+      env:
+        CI: true
+        
 
 
 
